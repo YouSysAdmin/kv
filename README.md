@@ -13,7 +13,7 @@ KV is a secure and lightweight command-line key-value store built in Go.
 go install github.com/yousysadmin/kv/cmd/kv@latest
 ```
 ```bash
-# By default install to $HOME/.bin dir
+# By default install to $HOME/.local/bin dir
 curl -L https://raw.githubusercontent.com/yousysadmin/kv/master/scripts/install.sh | bash
 ```
 Or download a release directly from GitHub: https://github.com/yousysadmin/kv/releases
@@ -39,6 +39,26 @@ You can also use the `--json` flag to format the output as JSON.
 ```
 --json     output as json
 --values   decrypt and output values
+```
+
+#### Completion
+For session:
+```shell
+source <(kv completion zsh)
+```
+
+Permanent:
+```shell
+# https://blog.chmouel.com/posts/cobra-completions/#installation
+# add to ~/.zshrc
+autoload -U compinit;
+compinit
+mkdir -p ~/.zsh_completions/
+fpath+=(~/.zsh_completions/)
+```
+```shell
+# dump the completion in that directory
+kv completion zsh > "${HOME}/.zsh_completions/_kv"
 ```
 
 ### Examples
