@@ -2,17 +2,13 @@ package storage
 
 import (
 	"errors"
+	"github.com/yousysadmin/kv/internal/models"
 	"github.com/yousysadmin/kv/pkg/encrypt"
 	"go.etcd.io/bbolt"
 	bboltErr "go.etcd.io/bbolt/errors"
 )
 
 const DefaultBucket = "default"
-
-type Entity struct {
-	Key   string `json:"key" yaml:"key"`
-	Value string `json:"value,omitempty" yaml:"value,omitempty"`
-}
 
 var (
 	ErrValueIsEmpty = errors.New("key not found or value is empty")
@@ -81,8 +77,8 @@ func (d *EntityStorage) Delete(bucket string, key string) error {
 }
 
 // List returns all keys in the specified bucket, optionally including decrypted values.
-func (d *EntityStorage) List(bucket string, withValues bool) ([]Entity, error) {
-	var entries []Entity
+func (d *EntityStorage) List(bucket string, withValues bool) ([]models.Entity, error) {
+	var entries []models.Entity
 
 	err := d.db.View(func(tx *bbolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
@@ -96,9 +92,9 @@ func (d *EntityStorage) List(bucket string, withValues bool) ([]Entity, error) {
 				if err != nil {
 					return err
 				}
-				entries = append(entries, Entity{string(k), decValue})
+				entries = append(entries, models.Entity{Key: string(k), Value: decValue})
 			} else {
-				entries = append(entries, Entity{string(k), ""})
+				entries = append(entries, models.Entity{Key: string(k), Value: ""})
 			}
 
 			return nil

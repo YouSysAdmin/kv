@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/yousysadmin/kv/internal/models"
 	"github.com/yousysadmin/kv/internal/storage"
 	"os"
 
@@ -48,7 +49,7 @@ func init() {
 }
 
 // outputKeyList print list of keys in plaintext or json format
-func outputKeyList(data []storage.Entity) error {
+func outputKeyList(data []models.Entity) error {
 	if asJson {
 		if data, err := json.Marshal(data); err == nil {
 			fmt.Println(string(data))

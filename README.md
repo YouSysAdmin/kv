@@ -33,6 +33,7 @@ kv [command] [flags]
 - `kv delete key <key>|<key@bucket>` – Delete a key
 - `kv delete bucket <bucket>` – Delete a bucket
 - `kv version` – Show version information
+- `kv import ssm` – Import KV from the AWS SSM service
 
 The `kv list keys` command lists only keys in a bucket. You can use the `--values` flag to decrypt values and output them in `key:value` format.
 You can also use the `--json` flag to format the output as JSON.
@@ -85,21 +86,21 @@ kv list buckets # list available buckets
 
 kv list keys # list keys in a bucket
 # Output:
-# amin-password
+# admin-password
 # api-token
 
 kv list keys --values
 # Output:
-# amin-password:SuperLongAdminPassword
+# admin-password:SuperLongAdminPassword
 # api-token:SuperLongToken
 
 kv list keys --json
 # Output:
-# [{"key":"amin-password"},{"key":"api-token"}]
+# [{"key":"admin-password"},{"key":"api-token"}]
 
 kv list keys --json --values
 # Output:
-# [{"key":"amin-password","value":"SuperLongAdminPassword"},{"key":"api-token","value":"SuperLongToken"}]
+# [{"key":"admin-password","value":"SuperLongAdminPassword"},{"key":"api-token","value":"SuperLongToken"}]
 ```
 #### Delete:
 Important: The result of the `delete` operation cannot be undone.
@@ -108,6 +109,35 @@ kv delete key my-key # delete key from the default bucket
 kv delete key my-key@prod # delete key from the `prod` bucket
 
 kv delete bucket prod # delete the `prod` bucket and all related records
+```
+
+#### Import from SSM
+```shell
+# Import all secrets under a path using the default profile
+# Region must be set in ~/.aws/config, ~/.aws/credentials or AWS_REGION environment variable
+kv import ssm --bucket=mybucket /prod/secrets
+
+# Use a specific AWS profile and region
+kv import ssm --bucket=mybucket --profile=dev --region=ca-central-1 /dev/app/config
+
+# Use static access key credentials (profile is ignored)
+# Can use a default AWS CLI environment variable
+# https://docs.aws.amazon.com/cli/v1/userguide/cli-configure-envvars.html#envvars-set
+kv import ssm --bucket=mybucket --key-id=AKIA... --secret-key=... --region=us-west-2 /prod/secure
+
+# Recursively import full key names under a prefix
+# e.g., /prod/env/database_password
+kv import ssm --bucket=mybucket --recursive /prod/env/
+
+# Recursively import and trim key names
+# e.g., /prod/env/database_password => database_password
+kv import ssm --bucket=mybucket --recursive --trim-key-name /prod/env/
+
+# Perform a dry-run import without writing data
+kv import ssm --bucket=mybucket --dry-run /dev
+
+# Dry-run and show key values for verification
+kv import ssm --bucket=mybucket --dry-run --show-values /prod
 ```
 
 ## Configuration
