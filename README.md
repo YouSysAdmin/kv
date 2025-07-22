@@ -7,6 +7,7 @@ KV is a secure and lightweight command-line key-value store built in Go.
 - Key-value pair storage with optional buckets
 - AES-256 encryption for all values
 - Import key-value from the AWS SSM Parameters service
+- Read key value from a file, STDIN or plain tex
 
 ## Installation
 
