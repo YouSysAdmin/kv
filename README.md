@@ -67,6 +67,8 @@ kv completion zsh > "${HOME}/.zsh_completions/_kv"
 ```shell
 kv add my-key my-value # add KV to the default bucket
 kv add my-key@prod my-value # add KV to the `prod` bucket
+kv add longtext @readme.txt # read value from file
+echo 'env=prod' | kv add config@env @- # read value from stdin
 ```
 #### Get:
 ```shell

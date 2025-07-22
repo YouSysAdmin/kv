@@ -25,7 +25,7 @@ Arguments:
   kv add username admin
   kv add password@auth supersecret
   kv add config@prod '{"debug":false}'
-  kv add longtext@doc @readme.txt
+  kv add longtext @readme.txt
   echo 'env=prod' | kv add config@env @-`,
 	Args: cobra.MatchAll(cobra.ExactArgs(2), cobra.OnlyValidArgs),
 	Run: func(cmd *cobra.Command, args []string) {
