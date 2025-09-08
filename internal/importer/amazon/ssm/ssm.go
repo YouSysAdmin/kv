@@ -2,9 +2,10 @@ package ssm
 
 import (
 	"context"
+	"strings"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
-	"strings"
 )
 
 // GetSecrets fetches parameters by prefix

@@ -3,18 +3,20 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"github.com/yousysadmin/kv/internal/storage"
-	"github.com/yousysadmin/kv/pkg/encrypt"
 	"os"
 	"strings"
+
+	"github.com/yousysadmin/kv/pkg/encrypt"
 )
 
 func parseKey(input string) (key string, bucket string) {
 	if strings.Contains(input, "@") {
 		parts := strings.SplitN(input, "@", 2)
-		return parts[0], parts[1]
+		key = parts[0]
+		bucket = parts[1]
+		return
 	}
-	return input, storage.DefaultBucket
+	return input, defaultBucketName
 }
 
 func getEncryptKey(encryptKey string, encryptKeyFile string) (string, error) {

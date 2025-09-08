@@ -1,9 +1,10 @@
 package encrypt_test
 
 import (
-	"github.com/yousysadmin/kv/pkg/encrypt"
 	"strings"
 	"testing"
+
+	"github.com/yousysadmin/kv/pkg/encrypt"
 )
 
 func TestGenerateRandomAESKey(t *testing.T) {

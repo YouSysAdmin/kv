@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+
 	awsSsm "github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/spf13/cobra"
 	"github.com/yousysadmin/kv/internal/importer/amazon"
 	"github.com/yousysadmin/kv/internal/importer/amazon/ssm"
 	"github.com/yousysadmin/kv/internal/storage"
-	"os"
 )
 
 var (

@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/yousysadmin/kv/internal/storage"
 	"os"
+
+	"github.com/yousysadmin/kv/internal/storage"
 
 	"github.com/spf13/cobra"
 )
