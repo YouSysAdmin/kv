@@ -26,7 +26,7 @@ It does not display values, only the stored keys.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var bucket string
 		if len(args) == 0 {
-			bucket = storage.DefaultBucket
+			bucket = defaultBucketName
 		} else {
 			bucket = args[0]
 		}
