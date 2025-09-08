@@ -3,9 +3,10 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+
 	"github.com/yousysadmin/kv/internal/models"
 	"github.com/yousysadmin/kv/internal/storage"
-	"os"
 
 	"github.com/spf13/cobra"
 )

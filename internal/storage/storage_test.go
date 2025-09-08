@@ -3,12 +3,13 @@ package storage_test
 import (
 	"errors"
 	"fmt"
+	"os"
+	"testing"
+
 	"github.com/yousysadmin/kv/internal/storage"
 	"github.com/yousysadmin/kv/pkg/encrypt"
 	"go.etcd.io/bbolt"
 	bboltErr "go.etcd.io/bbolt/errors"
-	"os"
-	"testing"
 )
 
 func setupTestDB(t *testing.T) (*bbolt.DB, func()) {
