@@ -23,7 +23,7 @@ If no bucket is provided, the key will be deleted from the default bucket.`,
 	Args: cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 	Run: func(cmd *cobra.Command, args []string) {
 		k, b := parseKey(args[0])
-		s := storage.NewEntityStorage(db, encryptionKey)
+		s := storage.NewEntityStorage(kvdb, "")
 		err := s.Delete(b, k)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "delete key: %s in bucket %s failed: %s\n", k, b, err.Error())

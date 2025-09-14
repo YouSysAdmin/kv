@@ -21,7 +21,7 @@ This command removes the specified bucket from the store.`,
 	Args: cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 	Run: func(cmd *cobra.Command, args []string) {
 		bucket := args[0]
-		s := storage.NewEntityStorage(db, encryptionKey)
+		s := storage.NewEntityStorage(kvdb, "")
 		err := s.DeleteBucket(bucket)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "delete bucket: %s failed: %s\n", bucket, err.Error())

@@ -77,7 +77,13 @@ var importSsmCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		s := storage.NewEntityStorage(db, encryptionKey)
+		encKey, err := selectKey(encryptionKeys, importBucketName)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		s := storage.NewEntityStorage(kvdb, encKey)
 		for key, value := range secrets {
 			if importDryRun {
 				if importShowValues {

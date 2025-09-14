@@ -8,14 +8,16 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/yousysadmin/kv/internal/enckeystore"
 	"github.com/yousysadmin/kv/internal/storage"
 	"go.etcd.io/bbolt"
 )
 
 var (
-	encryptionKey     string
-	db                *bbolt.DB
-	defaultBucketName string
+	encryptionKeys     map[string]string
+	encryptionKenStore *enckeystore.EncryptionKeyStore
+	kvdb               *bbolt.DB
+	defaultBucketName  string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -29,17 +31,20 @@ If not provided, a key will be generated automatically and stored in a file.
 
 The database path can be customized with the --db flag or the KV_DB_PATH environment variable.`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		k, err := getEncryptKey(viper.GetString("encryption-key"), viper.GetString("encryption-key-file"))
+		k, ks, err := loadAllKeys(
+			viper.GetString("encryption-key-store"), // path to keys.yaml
+			viper.GetString("encryption-key"),       // override encryption key if set via cli flag
+		)
 		if err != nil {
-			return fmt.Errorf("get encryption key: %w", err)
+			return fmt.Errorf("load keys: %w", err)
 		}
-		encryptionKey = k
+		encryptionKeys = k
+		encryptionKenStore = ks
 
-		kvdb, err := bbolt.Open(viper.GetString("db"), 0600, nil)
+		kvdb, err = bbolt.Open(viper.GetString("db"), 0o600, nil)
 		if err != nil {
 			return fmt.Errorf("open database: %w", err)
 		}
-		db = kvdb
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -61,17 +66,17 @@ func Execute() {
 func init() {
 	rootCmd.PersistentFlags().String("db", expandPath("~/.kv.db"), "path to database file (can also use KV_DB_PATH)")
 	rootCmd.PersistentFlags().String("encryption-key", "", "encryption key (can also use KV_ENCRYPTION_KEY)")
-	rootCmd.PersistentFlags().String("encryption-key-file", expandPath("~/.kv.key"), "path to encryption key file (can also use KV_ENCRYPTION_KEY_FILE)")
+	rootCmd.PersistentFlags().String("encryption-key-store", expandPath("~/.kv.key"), "path to encryption key file (can also use KV_ENCRYPTION_KEY_STORE)")
 	rootCmd.PersistentFlags().StringVar(&defaultBucketName, "default-bucket", storage.DefaultBucket, "default bucket name (can also use KV_DEFAULT_BUCKET)")
 
 	viper.BindPFlag("db", rootCmd.PersistentFlags().Lookup("db"))
 	viper.BindPFlag("encryption-key", rootCmd.PersistentFlags().Lookup("encryption-key"))
-	viper.BindPFlag("encryption-key-file", rootCmd.PersistentFlags().Lookup("encryption-key-file"))
+	viper.BindPFlag("encryption-key-store", rootCmd.PersistentFlags().Lookup("encryption-key-store"))
 	viper.BindPFlag("default-bucket", rootCmd.PersistentFlags().Lookup("default-bucket"))
 
 	viper.BindEnv("db", "KV_DB_PATH")
 	viper.BindEnv("encryption-key", "KV_ENCRYPTION_KEY")
-	viper.BindEnv("encryption-key-file", "KV_ENCRYPTION_KEY_FILE")
+	viper.BindEnv("encryption-key-store", "KV_ENCRYPTION_KEY_STORE")
 	viper.BindEnv("default-bucket", "KV_DEFAULT_BUCKET")
 
 	cobra.OnInitialize(func() {
