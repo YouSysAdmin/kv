@@ -2,6 +2,7 @@ package storage
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/yousysadmin/kv/internal/models"
 	"github.com/yousysadmin/kv/pkg/encrypt"
@@ -86,12 +87,12 @@ func (d *EntityStorage) List(bucket string, withValues bool) ([]models.Entity, e
 		if b == nil {
 			return bboltErr.ErrBucketNotFound
 		}
-		b.ForEach(func(k, v []byte) error {
+		err := b.ForEach(func(k, v []byte) error {
 			if withValues {
 				aes := encrypt.NewAES(d.encryptionKey, string(v))
 				decValue, err := aes.Decrypt()
 				if err != nil {
-					return err
+					return fmt.Errorf("decrypt value for key '%s', err: %s", k, err)
 				}
 				entries = append(entries, models.Entity{Key: string(k), Value: decValue})
 			} else {
@@ -100,9 +101,17 @@ func (d *EntityStorage) List(bucket string, withValues bool) ([]models.Entity, e
 
 			return nil
 		})
-		return nil
+		return err
 	})
 	return entries, err
+}
+
+// AddBucket add new bucket.
+func (d *EntityStorage) AddBucket(name string) error {
+	return d.db.Update(func(tx *bbolt.Tx) error {
+		_, err := tx.CreateBucketIfNotExists([]byte(name))
+		return err
+	})
 }
 
 // ListBuckets returns the names of all buckets in the database.
@@ -115,6 +124,17 @@ func (d *EntityStorage) ListBuckets() ([]string, error) {
 		})
 	})
 	return buckets, err
+}
+
+// BucketExist check buckek existing.
+func (d *EntityStorage) BucketExist(name string) (bool, error) {
+	var exist bool
+	err := d.db.View(func(tx *bbolt.Tx) error {
+		b := tx.Bucket([]byte(name))
+		exist = (b != nil)
+		return nil
+	})
+	return exist, err
 }
 
 // DeleteBucket removes the specified bucket from the database.

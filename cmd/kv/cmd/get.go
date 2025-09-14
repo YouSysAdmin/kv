@@ -21,14 +21,20 @@ If a bucket is not specified, the default bucket will be used.`,
 	Args: cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 	Run: func(cmd *cobra.Command, args []string) {
 		k, b := parseKey(args[0])
-		s := storage.NewEntityStorage(db, encryptionKey)
+
+		encKey, err := selectKey(encryptionKeys, b)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		s := storage.NewEntityStorage(kvdb, encKey)
 		v, err := s.Get(b, k)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "get key: `%s` failed: %s\n", k, err.Error())
 			os.Exit(1)
 		}
 		fmt.Printf("%s", v)
-
 	},
 }
 

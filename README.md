@@ -6,6 +6,7 @@ KV is a secure and lightweight command-line key-value store built in Go.
 ## Features
 - Key-value pair storage with optional buckets
 - AES-256 encryption for all values
+- Shared encryption key or separate encryption key for each bucket
 - Import key-value from the AWS SSM Parameters service
 - Read key value from a file, STDIN or plain tex
 
@@ -28,7 +29,8 @@ kv [command] [flags]
 
 ### Commands
 
-- `kv add <key>|<key@bucket> <value>` – Add or update a value
+- `kv add key <key>|<key@bucket> <value>` – Add or update a value
+- `kv add bucket <name> - add a bucket`
 - `kv get <key>|<key@bucket>` – Retrieve a value
 - `kv list keys [<bucket>]` – List keys in the default or specified bucket
 - `kv list buckets` – List all available buckets
@@ -65,12 +67,19 @@ kv completion zsh > "${HOME}/.zsh_completions/_kv"
 ```
 
 ### Examples
-#### Add:
+#### Add bucket:
 ```shell
-kv add my-key my-value # add KV to the default bucket
-kv add my-key@prod my-value # add KV to the `prod` bucket
-kv add longtext @readme.txt # read value from file
-echo 'env=prod' | kv add config@env @- # read value from stdin
+kv add bucket prod-secrets # create a bucket with a default encryption key
+kv add bucket prod-secret --generate-new-key # create a bucket with a separate encryption key
+```
+#### Add key:
+IMPORTANT: If the bucket does not exist, a new bucket will be created using the default encryption key.
+           If you need a separate encryption key for the bucket, add a new bucket before KV.
+```shell
+kv add key my-key my-value # add KV to the default bucket
+kv add key my-key@prod my-value # add KV to the `prod` bucket
+kv add key longtext @readme.txt # read value from file
+echo 'env=prod' | kv add key config@env @- # read value from stdin
 ```
 #### Get:
 ```shell
@@ -147,7 +156,7 @@ kv import ssm --bucket=mybucket --dry-run --show-values /prod
 ## Configuration
 
 > IMPORTANT:
-> On first start, a new encryption key will be generated and saved to a file.
+> On first start, a default encryption key will be generated and saved to a file.
 >
 > You cannot change the encryption key for existing key-value records.
 
@@ -157,7 +166,7 @@ You can set encryption and DB path using CLI flags or environment variables:
 |------------------------|-------------------------|-----------------------------|-----------|
 | Database path          | `--db`                  | `KV_DB_PATH`                | ~/.kv.db  |
 | Encryption key         | `--encryption-key`      | `KV_ENCRYPTION_KEY`         | ""        |
-| Encryption key file    | `--encryption-key-file` | `KV_ENCRYPTION_KEY_FILE`    | ~/.kv.key |
+| Encryption key store   | `--encryption-key-store`| `KV_ENCRYPTION_KEY_STORE`   | ~/.kv.key |
 
 If no key is provided, a new one is automatically generated and stored in the file by path `~/.kv.key`.
 

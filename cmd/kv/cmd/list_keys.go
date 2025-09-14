@@ -30,7 +30,14 @@ It does not display values, only the stored keys.`,
 		} else {
 			bucket = args[0]
 		}
-		s := storage.NewEntityStorage(db, encryptionKey)
+
+		encKey, err := selectKey(encryptionKeys, bucket)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		s := storage.NewEntityStorage(kvdb, encKey)
 		v, err := s.List(bucket, withValues)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "list keys in bucket: `%s` failed: %s\n", bucket, err.Error())
