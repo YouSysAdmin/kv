@@ -114,6 +114,18 @@ kv list keys --json
 kv list keys --json --values
 # Output:
 # [{"key":"admin-password","value":"SuperLongAdminPassword"},{"key":"api-token","value":"SuperLongToken"}]
+
+kv list keys --dotenv --values
+# Output:
+# PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\nHkVN9...\n-----END DSA PRIVATE KEY-----\n"
+
+kv list keys --rails-dotenv --values
+# Output:
+# PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----
+# ...
+# HkVN9...
+# ...
+# -----END DSA PRIVATE KEY-----"
 ```
 #### Delete:
 Important: The result of the `delete` operation cannot be undone.

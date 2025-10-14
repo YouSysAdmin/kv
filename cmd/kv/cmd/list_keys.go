@@ -7,12 +7,12 @@ import (
 
 	"github.com/yousysadmin/kv/internal/models"
 	"github.com/yousysadmin/kv/internal/storage"
+	"github.com/yousysadmin/kv/internal/utils"
 
 	"github.com/spf13/cobra"
 )
 
-var withValues bool
-var asJson bool
+var withValues, asJson, asDotenv, asRailsDotenv bool
 
 // listKeysCmd represents the keys command
 var listKeysCmd = &cobra.Command{
@@ -54,6 +54,8 @@ func init() {
 	listCmd.AddCommand(listKeysCmd)
 	listKeysCmd.PersistentFlags().BoolVar(&withValues, "values", false, "decrypt and output values")
 	listKeysCmd.PersistentFlags().BoolVar(&asJson, "json", false, "output as json")
+	listKeysCmd.PersistentFlags().BoolVar(&asDotenv, "dotenv", false, "output as escaped dotenv")
+	listKeysCmd.PersistentFlags().BoolVar(&asRailsDotenv, "rails-dotenv", false, "output values in multiline format for compatibility with Ruby Dotenv")
 }
 
 // outputKeyList print list of keys in plaintext or json format
@@ -64,14 +66,35 @@ func outputKeyList(data []models.Entity) error {
 		} else {
 			return err
 		}
-	} else {
-		for _, kv := range data {
-			if withValues {
-				fmt.Printf("%s:%s\n", kv.Key, kv.Value)
-			} else {
-				fmt.Println(kv.Key)
+		return nil
+	}
+
+	if asDotenv || asRailsDotenv {
+		if asRailsDotenv {
+			o, err := utils.ToDotenvMode(data, withValues, utils.DotenvMultiline)
+			if err != nil {
+				return err
 			}
+			fmt.Println(o)
+			return nil
+		}
+
+		o, err := utils.ToDotenvMode(data, withValues, utils.DotenvEscaped)
+		if err != nil {
+			return err
+		}
+		fmt.Println(o)
+		return nil
+
+	}
+
+	for _, kv := range data {
+		if withValues {
+			fmt.Printf("%s:%s\n", kv.Key, kv.Value)
+		} else {
+			fmt.Println(kv.Key)
 		}
 	}
+
 	return nil
 }
