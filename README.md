@@ -111,15 +111,15 @@ kv list keys --json
 # Output:
 # [{"key":"admin-password"},{"key":"api-token"}]
 
-kv list keys --json --values
+kv list keys --format=json --values
 # Output:
 # [{"key":"admin-password","value":"SuperLongAdminPassword"},{"key":"api-token","value":"SuperLongToken"}]
 
-kv list keys --dotenv --values
+kv list keys --format=dotenv --values
 # Output:
 # PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\nHkVN9...\n-----END DSA PRIVATE KEY-----\n"
 
-kv list keys --rails-dotenv --values
+kv list keys --format=rails-dotenv --values
 # Output:
 # PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----
 # ...
