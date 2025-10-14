@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 
@@ -12,7 +13,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var withValues, asJson, asDotenv, asRailsDotenv bool
+var (
+	withValues bool
+	format     string
+)
 
 // listKeysCmd represents the keys command
 var listKeysCmd = &cobra.Command{
@@ -53,41 +57,62 @@ It does not display values, only the stored keys.`,
 func init() {
 	listCmd.AddCommand(listKeysCmd)
 	listKeysCmd.PersistentFlags().BoolVar(&withValues, "values", false, "decrypt and output values")
-	listKeysCmd.PersistentFlags().BoolVar(&asJson, "json", false, "output as json")
-	listKeysCmd.PersistentFlags().BoolVar(&asDotenv, "dotenv", false, "output as escaped dotenv")
-	listKeysCmd.PersistentFlags().BoolVar(&asRailsDotenv, "rails-dotenv", false, "output values in multiline format for compatibility with Ruby Dotenv")
+	listKeysCmd.PersistentFlags().StringVar(&format, "format", "raw", "output format [raw, json, dotenv, rails-dotenv]")
 }
 
 // outputKeyList print list of keys in plaintext or json format
 func outputKeyList(data []models.Entity) error {
-	if asJson {
-		if data, err := json.Marshal(data); err == nil {
-			fmt.Println(string(data))
-		} else {
+	switch format {
+	case "raw":
+		if err := printRaw(data, withValues); err != nil {
 			return err
 		}
-		return nil
-	}
-
-	if asDotenv || asRailsDotenv {
-		if asRailsDotenv {
-			o, err := utils.ToDotenvMode(data, withValues, utils.DotenvMultiline)
-			if err != nil {
-				return err
-			}
-			fmt.Println(o)
-			return nil
-		}
-
-		o, err := utils.ToDotenvMode(data, withValues, utils.DotenvEscaped)
-		if err != nil {
+	case "dotenv", "rails-dotenv":
+		if err := printDotenv(data, format, withValues); err != nil {
 			return err
 		}
-		fmt.Println(o)
-		return nil
+	case "json":
+		if err := printJson(data); err != nil {
+			return err
+		}
+	default:
+		return errors.New("unkown output format")
 
 	}
 
+	return nil
+}
+
+// printDotenv print list of key as dotenv
+func printDotenv(data []models.Entity, format string, withValues bool) error {
+	var dotenvFormat utils.DotenvMode
+
+	if format == "rails-dotenv" {
+		dotenvFormat = utils.DotenvMultiline
+	} else {
+		dotenvFormat = utils.DotenvEscaped
+	}
+	o, err := utils.ToDotenvMode(data, withValues, dotenvFormat)
+	if err != nil {
+		return err
+	}
+	fmt.Println(o)
+	return nil
+
+}
+
+// printJson prinv list of kv as json
+func printJson(data []models.Entity) error {
+	if data, err := json.Marshal(data); err == nil {
+		fmt.Println(string(data))
+	} else {
+		return err
+	}
+	return nil
+}
+
+// printRaw print kv as raw
+func printRaw(data []models.Entity, withValues bool) error {
 	for _, kv := range data {
 		if withValues {
 			fmt.Printf("%s:%s\n", kv.Key, kv.Value)
