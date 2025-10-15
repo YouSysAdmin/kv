@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/yousysadmin/kv/internal/models"
 	"github.com/yousysadmin/kv/internal/storage"
@@ -28,6 +29,21 @@ It does not display values, only the stored keys.`,
   kv list keys
   kv list keys mybucket
   kv list keys --bucket=mybucket`,
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		s := storage.NewEntityStorage(kvdb, "")
+		bl, err := s.ListBuckets()
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveError
+		}
+
+		var out []string
+		for _, k := range bl {
+			if strings.HasPrefix(k, toComplete) {
+				out = append(out, k)
+			}
+		}
+		return out, cobra.ShellCompDirectiveNoFileComp
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var bucket string
 		if len(args) == 0 {
