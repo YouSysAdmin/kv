@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/yousysadmin/kv/internal/models"
 	"github.com/yousysadmin/kv/internal/storage"
@@ -26,11 +27,27 @@ var listKeysCmd = &cobra.Command{
 It does not display values, only the stored keys.`,
 	Example: `
   kv list keys
-  kv list keys mybucket`,
+  kv list keys mybucket
+  kv list keys --bucket=mybucket`,
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		s := storage.NewEntityStorage(kvdb, "")
+		bl, err := s.ListBuckets()
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveError
+		}
+
+		var out []string
+		for _, k := range bl {
+			if strings.HasPrefix(k, toComplete) {
+				out = append(out, k)
+			}
+		}
+		return out, cobra.ShellCompDirectiveNoFileComp
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var bucket string
 		if len(args) == 0 {
-			bucket = defaultBucketName
+			bucket = bucketName
 		} else {
 			bucket = args[0]
 		}
@@ -56,8 +73,8 @@ It does not display values, only the stored keys.`,
 
 func init() {
 	listCmd.AddCommand(listKeysCmd)
-	listKeysCmd.PersistentFlags().BoolVar(&withValues, "values", false, "decrypt and output values")
-	listKeysCmd.PersistentFlags().StringVar(&format, "format", "raw", "output format [raw, json, dotenv, rails-dotenv]")
+	listKeysCmd.PersistentFlags().BoolVarP(&withValues, "values", "v", false, "decrypt and output values")
+	listKeysCmd.PersistentFlags().StringVarP(&format, "format", "f", "raw", "output format [raw, json, dotenv, rails-dotenv]")
 }
 
 // outputKeyList print list of keys in plaintext or json format

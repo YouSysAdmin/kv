@@ -15,7 +15,7 @@ func parseKey(input string) (key string, bucket string) {
 		bucket = parts[1]
 		return
 	}
-	return input, defaultBucketName
+	return input, bucketName
 }
 
 // loadAllKeys returns all keys in Encryption Key Store

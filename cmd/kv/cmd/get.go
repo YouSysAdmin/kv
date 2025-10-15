@@ -17,7 +17,8 @@ var getCmd = &cobra.Command{
 If a bucket is not specified, the default bucket will be used.`,
 	Example: `
   kv get username
-  kv get username@production`,
+  kv get username@production
+  kv get --bucket=production username`,
 	Args: cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 	Run: func(cmd *cobra.Command, args []string) {
 		k, b := parseKey(args[0])

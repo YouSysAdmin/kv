@@ -5,7 +5,6 @@ import (
 )
 
 var (
-	importBucketName string
 	importDryRun     bool
 	importShowValues bool
 )
@@ -21,7 +20,6 @@ var importCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(importCmd)
 
-	importCmd.PersistentFlags().StringVarP(&importBucketName, "bucket", "b", "", "Target bucket name")
-	importCmd.PersistentFlags().BoolVar(&importDryRun, "dry-run", false, "Show what would be imported without writing")
-	importCmd.PersistentFlags().BoolVar(&importShowValues, "show-values", false, "Show key values during import")
+	importCmd.PersistentFlags().BoolVarP(&importDryRun, "dry-run", "d", false, "Show what would be imported without writing")
+	importCmd.PersistentFlags().BoolVarP(&importShowValues, "values", "v", false, "Show key values during import")
 }

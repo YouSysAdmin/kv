@@ -78,5 +78,5 @@ Arguments:
 func init() {
 	addCmd.AddCommand(addBucketCmd)
 
-	addBucketCmd.PersistentFlags().BoolVar(&generateNewKey, "generate-new-key", false, "Generate a new encryption key for this bucket")
+	addBucketCmd.PersistentFlags().BoolVarP(&generateNewKey, "generate-new-key", "k", false, "Generate a new encryption key for this bucket")
 }

@@ -26,9 +26,12 @@ Arguments:
   <value>       The value to be encrypted and stored.`,
 	Example: `
   kv add key username admin
+  kv add key --bucket=prod username admin
   kv add key password@auth supersecret
   kv add key config@prod '{"debug":false}'
+  # read value from file
   kv add key longtext @readme.txt
+  # read value from STDIN
   echo 'env=prod' | kv add key config@env @-`,
 	Args: cobra.MatchAll(cobra.ExactArgs(2), cobra.OnlyValidArgs),
 	Run: func(cmd *cobra.Command, args []string) {
