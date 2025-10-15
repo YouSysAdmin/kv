@@ -19,6 +19,7 @@ This command removes the specified key from store.
 If no bucket is provided, the key will be deleted from the default bucket.`,
 	Example: `
   kv delete username
+  kv delete --bucket=prod username
   kv delete token@authservice`,
 	Args: cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 	Run: func(cmd *cobra.Command, args []string) {

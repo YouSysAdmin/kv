@@ -26,11 +26,12 @@ var listKeysCmd = &cobra.Command{
 It does not display values, only the stored keys.`,
 	Example: `
   kv list keys
-  kv list keys mybucket`,
+  kv list keys mybucket
+  kv list keys --bucket=mybucket`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var bucket string
 		if len(args) == 0 {
-			bucket = defaultBucketName
+			bucket = bucketName
 		} else {
 			bucket = args[0]
 		}
@@ -56,8 +57,8 @@ It does not display values, only the stored keys.`,
 
 func init() {
 	listCmd.AddCommand(listKeysCmd)
-	listKeysCmd.PersistentFlags().BoolVar(&withValues, "values", false, "decrypt and output values")
-	listKeysCmd.PersistentFlags().StringVar(&format, "format", "raw", "output format [raw, json, dotenv, rails-dotenv]")
+	listKeysCmd.PersistentFlags().BoolVarP(&withValues, "values", "v", false, "decrypt and output values")
+	listKeysCmd.PersistentFlags().StringVarP(&format, "format", "f", "raw", "output format [raw, json, dotenv, rails-dotenv]")
 }
 
 // outputKeyList print list of keys in plaintext or json format

@@ -36,7 +36,7 @@ var importSsmCmd = &cobra.Command{
   # Use static access key credentials (profile is ignored)
   # Can use a default AWS CLI environment variable
   # https://docs.aws.amazon.com/cli/v1/userguide/cli-configure-envvars.html#envvars-set
-  kv import ssm --bucket=mybucket --key-id=AKIA... --secret-key=... --region=us-west-2 /prod/secure
+  kv import ssm --bucket=mybucket --aws-key-id=AKIA... --aws-secret-key=... --aws-region=us-west-2 /prod/secure
 
   # Recursively import full key names under a prefix
   # e.g., /prod/env/database_password
@@ -59,7 +59,7 @@ var importSsmCmd = &cobra.Command{
 			path = "/"
 		}
 
-		if importBucketName == "" {
+		if bucketName == "" {
 			fmt.Fprintln(os.Stderr, "import from ssm failed: bucket name is required")
 			os.Exit(1)
 		}
@@ -77,7 +77,7 @@ var importSsmCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		encKey, err := selectKey(encryptionKeys, importBucketName)
+		encKey, err := selectKey(encryptionKeys, bucketName)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -87,21 +87,21 @@ var importSsmCmd = &cobra.Command{
 		for key, value := range secrets {
 			if importDryRun {
 				if importShowValues {
-					fmt.Printf("DryRun[%s]: %s => %s\n", importBucketName, key, value)
+					fmt.Printf("DryRun[%s]: %s => %s\n", bucketName, key, value)
 				} else {
-					fmt.Printf("DryRun[%s]: %s\n", importBucketName, key)
+					fmt.Printf("DryRun[%s]: %s\n", bucketName, key)
 				}
 
 			} else {
-				err := s.Add(importBucketName, key, value)
+				err := s.Add(bucketName, key, value)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "add key: %s failed: %s\n", key, err.Error())
 					os.Exit(1)
 				}
 				if importShowValues {
-					fmt.Printf("Imported[%s]: %s => %s\n", importBucketName, key, value)
+					fmt.Printf("Imported[%s]: %s => %s\n", bucketName, key, value)
 				} else {
-					fmt.Printf("Imported[%s]: %s\n", importBucketName, key)
+					fmt.Printf("Imported[%s]: %s\n", bucketName, key)
 				}
 			}
 		}
@@ -112,11 +112,10 @@ var importSsmCmd = &cobra.Command{
 func init() {
 	importCmd.AddCommand(importSsmCmd)
 
-	importSsmCmd.PersistentFlags().StringVar(&ssmAwsAccessKeyID, "key-id", "", "AWS Access Key ID")
-	importSsmCmd.PersistentFlags().StringVar(&ssmAwsAccessKeySecret, "secret-key", "", "AWS Secret Access Key")
-	importSsmCmd.PersistentFlags().StringVar(&ssmAwsProfileName, "profile", "default", "AWS Profile name")
-	importSsmCmd.PersistentFlags().StringVar(&ssmAwsRegion, "region", "", "AWS Region")
+	importSsmCmd.PersistentFlags().StringVar(&ssmAwsAccessKeyID, "aws-key-id", "", "AWS Access Key ID")
+	importSsmCmd.PersistentFlags().StringVar(&ssmAwsAccessKeySecret, "aws-secret-key", "", "AWS Secret Access Key")
+	importSsmCmd.PersistentFlags().StringVar(&ssmAwsProfileName, "aws-profile", "default", "AWS Profile name")
+	importSsmCmd.PersistentFlags().StringVar(&ssmAwsRegion, "aws-region", "", "AWS Region")
 	importSsmCmd.PersistentFlags().BoolVarP(&ssmTrimKeyName, "trim-key-name", "t", false, "Trim key name to only the final path part (e.g., /foo/bar → bar)")
 	importSsmCmd.PersistentFlags().BoolVarP(&ssmRecursive, "recursive", "r", false, "Recursive import")
-
 }
