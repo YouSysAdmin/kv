@@ -1,7 +1,7 @@
 package main
 
-import "github.com/yousysadmin/kv/cmd/kv/cmd"
+import "github.com/yousysadmin/kv/cmd/kv/cli"
 
 func main() {
-	cmd.Execute()
+	cli.Execute()
 }
