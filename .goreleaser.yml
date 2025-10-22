@@ -95,39 +95,17 @@ nfpms:
         file_info:
           mode: 0644
 
-dockers:
-  # linux/amd64
-  - ids: [linux]
-    image_templates:
-      - ghcr.io/yousysadmin/kv:{{ .Version }}-amd64
-    dockerfile: build/docker/Dockerfile
-    # extra_files:
-    #   - build/docker/entrypoint.sh
-    use: buildx
-    build_flag_templates:
-      - --platform=linux/amd64
-      - --label=org.opencontainers.image.source=https://github.com/YouSysAdmin/kv
-      - --label=org.opencontainers.image.version={{ .Version }}
-
-  # linux/arm64
-  - ids: [linux]
-    image_templates:
-      - ghcr.io/yousysadmin/kv:{{ .Version }}-arm64
-    dockerfile: build/docker/Dockerfile
-    # extra_files:
-    #   - build/docker/entrypoint.sh
-    use: buildx
-    build_flag_templates:
-      - --platform=linux/arm64
-      - --label=org.opencontainers.image.source=https://github.com/YouSysAdmin/kv
-      - --label=org.opencontainers.image.version={{ .Version }}
-
-docker_manifests:
-  - name_template: ghcr.io/yousysadmin/kv:{{ .Version }}
-    image_templates:
-      - ghcr.io/yousysadmin/kv:{{ .Version }}-amd64
-      - ghcr.io/yousysadmin/kv:{{ .Version }}-arm64
-  - name_template: ghcr.io/yousysadmin/kv:latest
-    image_templates:
-      - ghcr.io/yousysadmin/kv:{{ .Version }}-amd64
-      - ghcr.io/yousysadmin/kv:{{ .Version }}-arm64
+dockers_v2:
+  - images:
+      - "ghcr.io/yousysadmin/kv"
+    tags:
+      - "v{{ .Version }}"
+      - "{{ if .IsNightly }}nightly{{ end }}"
+      - "{{ if not .IsNightly }}latest{{ end }}"
+    labels:
+      "org.opencontainers.image.description": "KV"
+      "org.opencontainers.image.created": "{{.Date}}"
+      "org.opencontainers.image.name": "{{.ProjectName}}"
+      "org.opencontainers.image.revision": "{{.FullCommit}}"
+      "org.opencontainers.image.version": "{{.Version}}"
+      "org.opencontainers.image.source": "{{.GitURL}}"
