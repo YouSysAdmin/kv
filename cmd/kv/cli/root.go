@@ -67,7 +67,7 @@ func init() {
 	rootCmd.PersistentFlags().String("db", expandPath("~/.kv.db"), "path to database file (can also use KV_DB_PATH)")
 	rootCmd.PersistentFlags().String("encryption-key", "", "encryption key (can also use KV_ENCRYPTION_KEY)")
 	rootCmd.PersistentFlags().String("encryption-key-store-path", expandPath("~/.kv.key"), "path to encryption key file (can also use KV_ENCRYPTION_KEY_STORE_PATH)")
-	rootCmd.PersistentFlags().StringVarP(&bucketName, "bucket", "b", storage.DefaultBucket, "default bucket name (can also use KV_BUCKET)")
+	rootCmd.PersistentFlags().StringP("bucket", "b", storage.DefaultBucket, "default bucket name (can also use KV_BUCKET)")
 
 	viper.BindPFlag("db", rootCmd.PersistentFlags().Lookup("db"))
 	viper.BindPFlag("encryption-key", rootCmd.PersistentFlags().Lookup("encryption-key"))
@@ -77,11 +77,14 @@ func init() {
 	viper.BindEnv("db", "KV_DB_PATH")
 	viper.BindEnv("encryption-key", "KV_ENCRYPTION_KEY")
 	viper.BindEnv("encryption-key-store-path", "KV_ENCRYPTION_KEY_STORE_PATH")
-	viper.BindEnv("default-bucket", "KV_BUCKET")
+	viper.BindEnv("bucket", "KV_BUCKET")
 
 	cobra.OnInitialize(func() {
 		viper.AutomaticEnv()
 		_ = viper.BindPFlags(rootCmd.PersistentFlags())
+
+		// bucket name value
+		bucketName = viper.GetString("bucket")
 	})
 }
 
