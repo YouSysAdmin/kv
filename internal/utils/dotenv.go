@@ -113,11 +113,10 @@ func toDotenvMultiline(entities []models.Entity, withValues bool) string {
 	return b.String()
 }
 
-var nonAlnum = regexp.MustCompile(`[^A-Za-z0-9]+`)
-
 // normalizeKey converts a key to uppercase, replaces any non-alphanumeric
 // characters with underscores, and trims leading/trailing underscores.
 func normalizeKey(k string) string {
+	nonAlnum := regexp.MustCompile(`[^A-Za-z0-9_]`)
 	k = strings.ToUpper(k)
 	k = nonAlnum.ReplaceAllString(k, "_")
 	return strings.Trim(k, "_")
