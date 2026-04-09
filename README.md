@@ -19,6 +19,10 @@ go install github.com/yousysadmin/kv/cmd/kv@latest
 # By default install to $HOME/.local/bin dir
 curl -L https://raw.githubusercontent.com/yousysadmin/kv/master/scripts/install.sh | bash
 ```
+```bash
+brew install yousysadmin/apps/headscale-pf
+```
+
 Or download a release directly from GitHub: https://github.com/yousysadmin/kv/releases
 
 ## Usage

@@ -77,11 +77,20 @@ changelog:
       - "^docs:"
       - "^test:"
 
+brews:
+  - repository:
+      owner: YouSysAdmin
+      name: homebrew-apps
+    directory: Formula
+    homepage: https://github.com/yousysadmin/kv
+    description: KV is a secure and lightweight command-line key-value store built in Go.
+    license: MIT
+
 nfpms:
   - file_name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}'
     maintainer: Oleksii YouSysAdmin
     homepage: https://github.com/yousysadmin/kv
-    description: Get AWS credentials via Jumpcloud SAML
+    description: KV is a secure and lightweight command-line key-value store built in Go.
     license: "MIT"
     formats:
       - deb
