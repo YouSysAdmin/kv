@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/yousysadmin/kv/internal/database"
 	"github.com/yousysadmin/kv/internal/storage"
 
 	"github.com/spf13/cobra"
@@ -29,7 +30,7 @@ If a bucket is not specified, the default bucket will be used.`,
 			os.Exit(1)
 		}
 
-		s := storage.NewEntityStorage(kvdb, encKey)
+		s := storage.NewEntityStorage(database.NewBolt(kvdb), encKey)
 		v, err := s.Get(b, k)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "get key: `%s` failed: %s\n", k, err.Error())

@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/yousysadmin/kv/internal/database"
 	"github.com/yousysadmin/kv/internal/models"
 	"github.com/yousysadmin/kv/internal/storage"
 	"github.com/yousysadmin/kv/internal/utils"
@@ -30,7 +31,7 @@ It does not display values, only the stored keys.`,
   kv list keys mybucket
   kv list keys --bucket=mybucket`,
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		s := storage.NewEntityStorage(kvdb, "")
+		s := storage.NewEntityStorage(database.NewBolt(kvdb), "")
 		bl, err := s.ListBuckets()
 		if err != nil {
 			return nil, cobra.ShellCompDirectiveError
@@ -58,7 +59,7 @@ It does not display values, only the stored keys.`,
 			os.Exit(1)
 		}
 
-		s := storage.NewEntityStorage(kvdb, encKey)
+		s := storage.NewEntityStorage(database.NewBolt(kvdb), encKey)
 		v, err := s.List(bucket, withValues)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "list keys in bucket: `%s` failed: %s\n", bucket, err.Error())

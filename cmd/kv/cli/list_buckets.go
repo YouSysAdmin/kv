@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/yousysadmin/kv/internal/database"
 	"github.com/yousysadmin/kv/internal/storage"
 
 	"github.com/spf13/cobra"
@@ -17,7 +18,7 @@ var listBucketsCmd = &cobra.Command{
 
 This command retrieves and prints the names of all top-level buckets stored in the database.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		s := storage.NewEntityStorage(kvdb, "")
+		s := storage.NewEntityStorage(database.NewBolt(kvdb), "")
 		bl, err := s.ListBuckets()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "list bucketets: failed: %s\n", err.Error())

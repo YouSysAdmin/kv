@@ -1,4 +1,4 @@
-// Provides dotenv formatting helpers.
+// Package utils Provides dotenv formatting helpers.
 //
 // Supports two output modes:
 //   - DotenvEscaped:    newline characters become literal "\n" (single-line format)

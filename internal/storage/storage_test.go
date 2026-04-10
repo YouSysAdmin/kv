@@ -2,10 +2,10 @@ package storage_test
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"testing"
 
+	"github.com/yousysadmin/kv/internal/database"
 	"github.com/yousysadmin/kv/internal/storage"
 	"github.com/yousysadmin/kv/pkg/encrypt"
 	"go.etcd.io/bbolt"
@@ -24,6 +24,12 @@ func setupTestDB(t *testing.T) (*bbolt.DB, func()) {
 	}
 }
 
+func setupBackend(t *testing.T) (storage.StorageBackend, func()) {
+	db, cleanup := setupTestDB(t)
+	backend := database.NewBolt(db)
+	return backend, cleanup
+}
+
 func mustGenKey(t *testing.T) string {
 	k, err := encrypt.GenerateRandomAESKey(encrypt.AES256)
 	if err != nil {
@@ -33,10 +39,10 @@ func mustGenKey(t *testing.T) string {
 }
 
 func TestAddAndGet(t *testing.T) {
-	db, cleanup := setupTestDB(t)
+	backend, cleanup := setupBackend(t)
 	defer cleanup()
 
-	s := storage.NewEntityStorage(db, mustGenKey(t))
+	s := storage.NewEntityStorage(backend, mustGenKey(t))
 	err := s.Add(storage.DefaultBucket, "foo", "bar")
 	if err != nil {
 		t.Fatalf("Add failed: %v", err)
@@ -53,10 +59,10 @@ func TestAddAndGet(t *testing.T) {
 }
 
 func TestAddEmptyValue(t *testing.T) {
-	db, cleanup := setupTestDB(t)
+	backend, cleanup := setupBackend(t)
 	defer cleanup()
 
-	s := storage.NewEntityStorage(db, mustGenKey(t))
+	s := storage.NewEntityStorage(backend, mustGenKey(t))
 	err := s.Add(storage.DefaultBucket, "empty", "")
 	if err != nil {
 		t.Fatalf("Add empty failed: %v", err)
@@ -69,10 +75,10 @@ func TestAddEmptyValue(t *testing.T) {
 }
 
 func TestGetNonExistentKey(t *testing.T) {
-	db, cleanup := setupTestDB(t)
+	backend, cleanup := setupBackend(t)
 	defer cleanup()
 
-	s := storage.NewEntityStorage(db, mustGenKey(t))
+	s := storage.NewEntityStorage(backend, mustGenKey(t))
 	_, err := s.Get(storage.DefaultBucket, "missing")
 	if err == nil {
 		t.Fatal("Expected error for missing key")
@@ -80,10 +86,10 @@ func TestGetNonExistentKey(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	db, cleanup := setupTestDB(t)
+	backend, cleanup := setupBackend(t)
 	defer cleanup()
 
-	s := storage.NewEntityStorage(db, mustGenKey(t))
+	s := storage.NewEntityStorage(backend, mustGenKey(t))
 	_ = s.Add(storage.DefaultBucket, "deleteMe", "123")
 
 	err := s.Delete(storage.DefaultBucket, "deleteMe")
@@ -98,10 +104,10 @@ func TestDelete(t *testing.T) {
 }
 
 func TestListKeysOnly(t *testing.T) {
-	db, cleanup := setupTestDB(t)
+	backend, cleanup := setupBackend(t)
 	defer cleanup()
 
-	s := storage.NewEntityStorage(db, mustGenKey(t))
+	s := storage.NewEntityStorage(backend, mustGenKey(t))
 	_ = s.Add(storage.DefaultBucket, "k1", "v1")
 	_ = s.Add(storage.DefaultBucket, "k2", "v2")
 
@@ -116,10 +122,10 @@ func TestListKeysOnly(t *testing.T) {
 }
 
 func TestListWithValues(t *testing.T) {
-	db, cleanup := setupTestDB(t)
+	backend, cleanup := setupBackend(t)
 	defer cleanup()
 
-	s := storage.NewEntityStorage(db, mustGenKey(t))
+	s := storage.NewEntityStorage(backend, mustGenKey(t))
 	_ = s.Add(storage.DefaultBucket, "k1", "v1")
 	_ = s.Add(storage.DefaultBucket, "k2", "v2")
 
@@ -136,10 +142,10 @@ func TestListWithValues(t *testing.T) {
 }
 
 func TestListBuckets(t *testing.T) {
-	db, cleanup := setupTestDB(t)
+	backend, cleanup := setupBackend(t)
 	defer cleanup()
 
-	s := storage.NewEntityStorage(db, mustGenKey(t))
+	s := storage.NewEntityStorage(backend, mustGenKey(t))
 	_ = s.Add("bucket1", "a", "1")
 	_ = s.Add("bucket2", "b", "2")
 
@@ -154,10 +160,10 @@ func TestListBuckets(t *testing.T) {
 }
 
 func TestDeleteBucket(t *testing.T) {
-	db, cleanup := setupTestDB(t)
+	backend, cleanup := setupBackend(t)
 	defer cleanup()
 
-	s := storage.NewEntityStorage(db, mustGenKey(t))
+	s := storage.NewEntityStorage(backend, mustGenKey(t))
 	_ = s.Add("toDelete", "foo", "bar")
 
 	err := s.DeleteBucket("toDelete")
@@ -172,39 +178,11 @@ func TestDeleteBucket(t *testing.T) {
 }
 
 func BenchmarkAdd(b *testing.B) {
-	db, cleanup := setupTestDB(&testing.T{})
+	backend, cleanup := setupBackend(nil)
 	defer cleanup()
-
-	s := storage.NewEntityStorage(db, mustGenKey(&testing.T{}))
-	for i := 0; i < b.N; i++ {
-		_ = s.Add(storage.DefaultBucket, "benchkey", "benchvalue")
-	}
-}
-
-func BenchmarkGet(b *testing.B) {
-	db, cleanup := setupTestDB(&testing.T{})
-	defer cleanup()
-
-	s := storage.NewEntityStorage(db, mustGenKey(&testing.T{}))
-	_ = s.Add(storage.DefaultBucket, "benchkey", "benchvalue")
-
+	s := storage.NewEntityStorage(backend, "some-key")
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, _ = s.Get(storage.DefaultBucket, "benchkey")
-	}
-}
-
-func BenchmarkList(b *testing.B) {
-	db, cleanup := setupTestDB(&testing.T{})
-	defer cleanup()
-
-	s := storage.NewEntityStorage(db, mustGenKey(&testing.T{}))
-	for i := 0; i < 1000; i++ {
-		_ = s.Add(storage.DefaultBucket, fmt.Sprintf("key%d", i), "value")
-	}
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_, _ = s.List(storage.DefaultBucket, true)
+		_ = s.Add(storage.DefaultBucket, "key", "val")
 	}
 }

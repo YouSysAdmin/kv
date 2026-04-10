@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/yousysadmin/kv/internal/database"
 	"github.com/yousysadmin/kv/internal/storage"
 
 	"github.com/spf13/cobra"
@@ -24,7 +25,7 @@ If no bucket is provided, the key will be deleted from the default bucket.`,
 	Args: cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 	Run: func(cmd *cobra.Command, args []string) {
 		k, b := parseKey(args[0])
-		s := storage.NewEntityStorage(kvdb, "")
+		s := storage.NewEntityStorage(database.NewBolt(kvdb), "")
 		err := s.Delete(b, k)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "delete key: %s in bucket %s failed: %s\n", k, b, err.Error())

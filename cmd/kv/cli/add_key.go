@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/yousysadmin/kv/internal/database"
 	"github.com/yousysadmin/kv/internal/storage"
 
 	"github.com/spf13/cobra"
@@ -43,7 +44,7 @@ Arguments:
 			os.Exit(1)
 		}
 
-		s := storage.NewEntityStorage(kvdb, encKey)
+		s := storage.NewEntityStorage(database.NewBolt(kvdb), encKey)
 		val, err := readValue(args[1])
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "add key: %s failed: %s\n", k, err.Error())

@@ -6,6 +6,7 @@ import (
 
 	awsSsm "github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/spf13/cobra"
+	"github.com/yousysadmin/kv/internal/database"
 	"github.com/yousysadmin/kv/internal/importer/amazon"
 	"github.com/yousysadmin/kv/internal/importer/amazon/ssm"
 	"github.com/yousysadmin/kv/internal/storage"
@@ -83,7 +84,7 @@ var importSsmCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		s := storage.NewEntityStorage(kvdb, encKey)
+		s := storage.NewEntityStorage(database.NewBolt(kvdb), encKey)
 		for key, value := range secrets {
 			if importDryRun {
 				if importShowValues {

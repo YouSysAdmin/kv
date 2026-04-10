@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/yousysadmin/kv/internal/database"
 	"github.com/yousysadmin/kv/internal/enckeystore"
 	"github.com/yousysadmin/kv/internal/storage"
 
@@ -16,10 +17,10 @@ var generateNewKey bool
 var addBucketCmd = &cobra.Command{
 	Use:   "bucket",
 	Short: "Add bucket.",
-	Long: `This command add a new bucket to the store  and stores.
+	Long: `This command add a new bucket to the store.
 
 Arguments:
-  <bucket_nam> [flags]
+  <bucket_name> [flags]
 
   <bucket_name> A bucket name.`,
 	Example: `
@@ -29,7 +30,7 @@ Arguments:
 	Run: func(cmd *cobra.Command, args []string) {
 		bucket := args[0]
 
-		s := storage.NewEntityStorage(kvdb, "")
+		s := storage.NewEntityStorage(database.NewBolt(kvdb), "")
 
 		// Check bucket exist
 		if exist, err := s.BucketExist(bucket); err != nil || exist {
@@ -37,8 +38,10 @@ Arguments:
 				fmt.Println(err)
 				os.Exit(1)
 			}
-			fmt.Printf("bucket %q exist\n", bucket)
-			os.Exit(1)
+			if exist {
+				fmt.Printf("bucket %q exist\n", bucket)
+				os.Exit(0)
+			}
 		}
 
 		// Create a new bucket
